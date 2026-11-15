@@ -1,0 +1,1330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>DrillLog Pro v5 — Field Drillers Log</title>
+  <style>
+    :root {
+      --paper: #efe6d4;
+      --card: #f7f3ea;
+      --ink: #1c1814;
+      --muted: #5f564c;
+      --line: #d5c9b6;
+      --blaze: #e24a10;
+      --amber: #b45309;
+      --green: #1e7e3e;
+      --red: #b91c1c;
+      --blue: #1d4ed8;
+      --font-sans: "Barlow", system-ui, -apple-system, sans-serif;
+      --font-display: "Barlow Condensed", "Barlow", system-ui, sans-serif;
+      --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
+    }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background-color: var(--paper);
+      background-image: linear-gradient(var(--blaze), var(--blaze));
+      background-size: 6px 100%;
+      background-repeat: no-repeat;
+      color: var(--ink);
+      font-family: var(--font-sans);
+      line-height: 1.4;
+      padding: 14px 14px 90px 18px;
+    }
+
+    .container { max-width: 720px; margin: 0 auto; }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid var(--ink);
+      padding-bottom: 10px;
+      margin-bottom: 12px;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .brand {
+      font-family: var(--font-display);
+      font-size: 1.85rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      line-height: 1;
+    }
+    .brand span { color: var(--blaze); }
+    .sub-brand { font-size: 0.78rem; color: var(--muted); font-weight: 700; letter-spacing: 0.03em; }
+
+    .header-actions { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+
+    /* Unit Tabs */
+    .unit-tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      background: var(--card);
+      border: 1.5px solid var(--line);
+      border-radius: 10px;
+      padding: 5px;
+      margin-bottom: 14px;
+    }
+
+    .unit-tab {
+      background: transparent;
+      color: var(--muted);
+      border: none;
+      border-radius: 7px;
+      padding: 9px 10px;
+      font-family: var(--font-display);
+      font-size: 0.98rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      cursor: pointer;
+    }
+    .unit-tab.active {
+      background: var(--ink);
+      color: var(--paper);
+    }
+
+    .metric-subbar {
+      display: none;
+      gap: 6px;
+      margin-bottom: 14px;
+      background: #fffdf9;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 8px 10px;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .metric-subbar.show { display: flex; }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 14px;
+      box-shadow: 0 2px 8px rgba(28, 24, 20, 0.06);
+    }
+
+    .card-title {
+      font-family: var(--font-display);
+      font-size: 1.15rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+      margin: 0 0 10px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+
+    label {
+      display: block;
+      font-size: 0.74rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      background: #fffdf9;
+      border: 1.5px solid var(--line);
+      border-radius: 8px;
+      padding: 9px 10px;
+      font-family: var(--font-sans);
+      font-size: 0.98rem;
+      font-weight: 600;
+      color: var(--ink);
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--blaze);
+    }
+
+    .mono { font-family: var(--font-mono); }
+
+    button {
+      font-family: var(--font-display);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 0.95rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+    }
+    button:active { transform: scale(0.97); }
+
+    .btn-primary { background: var(--blaze); color: #fff; }
+    .btn-dark { background: var(--ink); color: var(--paper); }
+    .btn-outline { background: transparent; border: 1.5px solid var(--ink); color: var(--ink); }
+    .btn-green { background: var(--green); color: #fff; }
+    .btn-red { background: var(--red); color: #fff; }
+    .btn-blue { background: var(--blue); color: #fff; }
+    .btn-sm { padding: 6px 9px; font-size: 0.82rem; }
+
+    .hole-bar { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; }
+    .hole-bar select { flex: 1; font-weight: 700; }
+
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px dashed var(--line);
+    }
+
+    .stat-box {
+      background: var(--paper);
+      padding: 8px 6px;
+      border-radius: 8px;
+      text-align: center;
+      border: 1px solid var(--line);
+    }
+    .stat-box.overdrill {
+      background: #fef3c7;
+      border-color: var(--amber);
+    }
+
+    .stat-val {
+      font-family: var(--font-mono);
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--ink);
+    }
+    .stat-val.accent { color: var(--blaze); }
+    .stat-val.overdrill-text { color: var(--amber); }
+    .stat-sub { font-family: var(--font-mono); font-size: 0.72rem; color: var(--muted); }
+    .stat-lbl { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; color: var(--muted); margin-top: 2px; }
+
+    .rod-controls {
+      display: grid;
+      grid-template-columns: 1fr 1.4fr;
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .rod-btn-big { padding: 14px; font-size: 1.1rem; }
+
+    .timer-display {
+      font-family: var(--font-mono);
+      font-size: 2.5rem;
+      font-weight: 700;
+      text-align: center;
+      background: var(--ink);
+      color: #fff;
+      padding: 12px;
+      border-radius: 10px;
+      letter-spacing: 0.05em;
+      margin-bottom: 10px;
+    }
+    .timer-display.running { box-shadow: 0 0 0 3px var(--blaze); }
+
+    /* SPT Blow Count Panel */
+    .spt-box {
+      display: none;
+      background: #fff8ed;
+      border: 1.5px solid var(--amber);
+      border-radius: 9px;
+      padding: 10px;
+      margin-top: 10px;
+    }
+    .spt-box.show { display: block; }
+    .n-val-pill {
+      display: inline-block;
+      background: var(--amber);
+      color: #fff;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+    }
+
+    /* Voice Pill */
+    .voice-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-family: var(--font-display);
+      font-weight: 700;
+      text-transform: uppercase;
+      background: var(--paper);
+      border: 1.5px solid var(--line);
+      color: var(--ink);
+    }
+    .voice-pill.active {
+      background: #fee2e2;
+      border-color: var(--red);
+      color: var(--red);
+    }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+    .voice-pill.active .dot { background: var(--red); animation: pulse 1.2s infinite; }
+    @keyframes pulse { 50% { opacity: 0.25; } }
+
+    .log-item {
+      background: #fffdf9;
+      border: 1px solid var(--line);
+      border-left: 4px solid var(--blaze);
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin-bottom: 10px;
+    }
+    .log-item.overdrill-item { border-left-color: var(--amber); }
+
+    .badge {
+      display: inline-block;
+      font-size: 0.68rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      padding: 2px 6px;
+      border-radius: 4px;
+      letter-spacing: 0.04em;
+    }
+    .badge-over { background: #fef3c7; color: var(--amber); border: 1px solid var(--amber); }
+    .badge-spt { background: #dbeafe; color: var(--blue); border: 1px solid var(--blue); }
+
+    .photo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .photo-thumb {
+      position: relative;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      aspect-ratio: 1;
+      background: #000;
+    }
+    .photo-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .photo-del {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      background: rgba(0,0,0,0.75);
+      color: #fff;
+      border-radius: 50%;
+      width: 22px;
+      height: 22px;
+      padding: 0;
+      font-size: 0.75rem;
+    }
+
+    .discrepancy-card {
+      border: 1.5px solid var(--red);
+      background: #fffafa;
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+      padding: 16px;
+    }
+    .modal-backdrop.open { display: flex; }
+    .modal-backdrop img { max-width: 100%; max-height: 85vh; border-radius: 8px; }
+
+    @media print {
+      body { background: #fff; padding: 0; }
+      .no-print { display: none !important; }
+      .card { box-shadow: none; border: 1px solid #ccc; break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <div class="brand">DRILL<span>LOG</span> PRO <span style="font-size:1rem;">V5</span></div>
+        <div class="sub-brand">OFFLINE FIELD, CORE &amp; GEOTECH LOG</div>
+      </div>
+      <div class="header-actions no-print">
+        <button id="voiceToggleBtn" class="voice-pill" onclick="toggleVoice()">
+          <span class="dot"></span>
+          <span id="voiceLabel">Voice Off</span>
+        </button>
+        <button class="btn-outline btn-sm" onclick="exportCSV()">CSV</button>
+        <button class="btn-dark btn-sm" onclick="window.print()">Print</button>
+      </div>
+    </header>
+
+    <!-- Unit System Tabs -->
+    <div class="unit-tabs no-print">
+      <button id="tabImperial" class="unit-tab active" onclick="setUnitSystem('imperial')">Imperial (ft / in)</button>
+      <button id="tabMetric" class="unit-tab" onclick="setUnitSystem('metric')">Metric (m / cm / mm)</button>
+    </div>
+
+    <div id="metricSubbar" class="metric-subbar no-print">
+      <span style="font-size:0.78rem; font-weight:700; text-transform:uppercase; color:var(--muted);">Metric Display Mode:</span>
+      <select id="metricPrecision" style="width:auto; padding:5px 8px; font-size:0.85rem;" onchange="setMetricMode(this.value)">
+        <option value="m_cm">Meters + Centimeters (m / cm)</option>
+        <option value="cm_mm">Centimeters + Millimeters (cm / mm)</option>
+        <option value="mm">Millimeters Only (mm)</option>
+      </select>
+    </div>
+
+    <!-- Voice Status Banner -->
+    <div id="voicePanel" class="card no-print" style="display:none; padding:10px 14px; border-color:var(--blaze);">
+      <div style="font-size:0.82rem; font-weight:800; color:var(--blaze);">HANDS-FREE VOICE CONTROL ACTIVE</div>
+      <div id="voiceStatus" style="font-size:0.84rem; color:var(--muted); margin-top:2px;">
+        Commands: "Add rod", "Pull rod", "Start timer", "Pause timer", "Reset timer", "Log run"
+      </div>
+    </div>
+
+    <!-- Rig Hours & Water Table -->
+    <div class="card">
+      <div class="card-title">
+        <span>Shift, Rig Hours &amp; Water Table</span>
+        <span class="mono" id="rigTotalHrsBadge" style="font-size:0.85rem; color:var(--blaze);">0.0 hrs</span>
+      </div>
+      <div class="grid-3">
+        <div>
+          <label>Date</label>
+          <input type="date" id="logDate" onchange="updateHoleField('date', this.value)" />
+        </div>
+        <div>
+          <label>Rig Start Hrs</label>
+          <input type="number" step="0.1" id="rigStart" oninput="updateHoleField('rigStart', parseFloat(this.value)||0)" placeholder="1240.5" />
+        </div>
+        <div>
+          <label>Rig End Hrs</label>
+          <input type="number" step="0.1" id="rigEnd" oninput="updateHoleField('rigEnd', parseFloat(this.value)||0)" placeholder="1248.5" />
+        </div>
+      </div>
+
+      <div class="grid-3" style="margin-top:10px;">
+        <div>
+          <label>Hole Start Time</label>
+          <input type="time" id="holeStartTime" onchange="updateHoleField('holeStartTime', this.value)" />
+        </div>
+        <div>
+          <label>Hole Stop Time</label>
+          <input type="time" id="holeStopTime" onchange="updateHoleField('holeStopTime', this.value)" />
+        </div>
+        <div>
+          <label id="waterLbl">Water Table (ft)</label>
+          <input type="number" step="0.1" id="waterTable" oninput="updateHoleField('waterTable', this.value)" placeholder="e.g. 18.5" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Active Drill Hole & Rod Counter -->
+    <div class="card">
+      <div class="card-title">
+        <span>Active Drill Hole &amp; Rod Counter</span>
+        <button class="btn-outline btn-sm no-print" onclick="createNewHole()">+ New Hole</button>
+      </div>
+      <div class="hole-bar no-print">
+        <select id="holeSelect" onchange="switchHole(this.value)"></select>
+        <button class="btn-red btn-sm" onclick="deleteCurrentHole()">Del</button>
+      </div>
+
+      <div class="grid-2">
+        <div>
+          <label>Hole Name / ID</label>
+          <input type="text" id="holeName" oninput="updateHoleField('name', this.value)" placeholder="DH-26-01" />
+        </div>
+        <div>
+          <label id="targetLbl">Target Depth (ft)</label>
+          <input type="number" step="0.1" id="targetDepthInput" oninput="updateTargetDepth(this.value)" placeholder="100" />
+        </div>
+      </div>
+
+      <div class="grid-3" style="margin-top:10px;">
+        <div>
+          <label>Rod / Tooling Type</label>
+          <select id="rodType" onchange="onRodTypeChange(this.value)">
+            <option value="MC5">MC5</option>
+            <option value="MC7">MC7</option>
+            <option value="3.5&quot; HSA">3.5" HSA</option>
+            <option value="4.5&quot; HSA">4.5" HSA</option>
+            <option value="3.5&quot; SFA">3.5" SFA</option>
+            <option value="DT37">DT37</option>
+            <option value="DT45">DT45</option>
+            <option value="HQ">HQ (Core)</option>
+            <option value="NQ">NQ (Core)</option>
+            <option value="PQ">PQ (Core)</option>
+            <option value="HW">HW (Casing)</option>
+            <option value="AW">AW</option>
+            <option value="Sonic">Sonic</option>
+            <option value="RC Pipe">RC Pipe</option>
+          </select>
+        </div>
+        <div>
+          <label id="rodMajorLbl">Rod Length (ft)</label>
+          <input type="number" step="1" id="rodMajorInput" oninput="updateRodLengthParts()" />
+        </div>
+        <div>
+          <label id="rodMinorLbl">Extra (in)</label>
+          <input type="number" step="0.5" id="rodMinorInput" oninput="updateRodLengthParts()" />
+        </div>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-box">
+          <div class="stat-val" id="statRods">0</div>
+          <div class="stat-sub" id="statRodEach">5' 0" ea</div>
+          <div class="stat-lbl">Rods In Hole</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-val accent" id="statDepth">0' 0.0"</div>
+          <div class="stat-sub" id="statDepthAlt">0.00 ft</div>
+          <div class="stat-lbl">Current Depth</div>
+        </div>
+        <div class="stat-box" id="targetStatBox">
+          <div class="stat-val" id="statTargetDelta">100' 0.0"</div>
+          <div class="stat-sub" id="statTargetAlt">100.00 ft</div>
+          <div class="stat-lbl" id="statTargetLbl">To Target</div>
+        </div>
+      </div>
+
+      <div class="rod-controls no-print">
+        <button class="btn-outline rod-btn-big" onclick="changeRodCount(-1)">- Pull Rod</button>
+        <button class="btn-primary rod-btn-big" onclick="changeRodCount(1)">+ Add Rod</button>
+      </div>
+    </div>
+
+    <!-- Run / Interval Timer -->
+    <div class="card">
+      <div class="card-title">
+        <span>Run / Interval Timer</span>
+        <span class="mono" id="lastLapBadge" style="font-size:0.82rem; color:var(--blaze);"></span>
+      </div>
+      <div class="timer-display" id="timerDisplay">00:00:00</div>
+      <div class="grid-3 no-print">
+        <button class="btn-green" id="timerStartBtn" onclick="toggleTimer()">Start</button>
+        <button class="btn-outline" onclick="resetTimer()">Reset</button>
+        <button class="btn-dark" onclick="logIntervalToSample()">Log Run</button>
+      </div>
+    </div>
+
+    <!-- Log Sample / Core Run / SPT -->
+    <div class="card no-print">
+      <div class="card-title">Log Sample / Core Run</div>
+      <div class="grid-3">
+        <div>
+          <label id="fromLbl">From (ft)</label>
+          <input type="number" step="0.1" id="sampleFrom" oninput="calcRecoveryPct()" />
+        </div>
+        <div>
+          <label id="toLbl">To (ft)</label>
+          <input type="number" step="0.1" id="sampleTo" oninput="calcRecoveryPct()" />
+        </div>
+        <div>
+          <label id="recLenLbl">Recovered (in)</label>
+          <input type="number" step="0.5" id="sampleRecLen" oninput="calcRecoveryPct()" placeholder="e.g. 60" />
+        </div>
+      </div>
+
+      <div class="grid-3" style="margin-top:10px;">
+        <div>
+          <label>Sample Type</label>
+          <select id="sampleType" onchange="toggleSptBox()">
+            <option value="Core Run">Core Run</option>
+            <option value="Split Spoon (SPT)">Split Spoon (SPT)</option>
+            <option value="Macro Core">Macro Core</option>
+            <option value="Dual Tube">Dual Tube</option>
+            <option value="Grab / Cuttings">Grab / Cuttings</option>
+            <option value="Shelby Tube">Shelby Tube</option>
+            <option value="Water / Loss">Water / Fluid Note</option>
+          </select>
+        </div>
+        <div>
+          <label>Recovery %</label>
+          <input type="number" min="0" max="150" id="sampleRecPct" value="100" />
+        </div>
+        <div>
+          <label>Run Time</label>
+          <input type="text" id="sampleDuration" class="mono" placeholder="00:00:00" />
+        </div>
+      </div>
+
+      <!-- SPT Blow Counts (Shown when Split Spoon SPT is selected) -->
+      <div id="sptBox" class="spt-box">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <span style="font-size:0.78rem; font-weight:800; text-transform:uppercase; color:var(--amber);">SPT Blow Counts (6" / 15cm Increments)</span>
+          <span class="n-val-pill" id="sptNBadge">N-Value: 0</span>
+        </div>
+        <div class="grid-4">
+          <div>
+            <label>0-6" (Seat)</label>
+            <input type="number" min="0" id="blow1" oninput="updateSptN()" placeholder="0" />
+          </div>
+          <div>
+            <label>6-12"</label>
+            <input type="number" min="0" id="blow2" oninput="updateSptN()" placeholder="0" />
+          </div>
+          <div>
+            <label>12-18"</label>
+            <input type="number" min="0" id="blow3" oninput="updateSptN()" placeholder="0" />
+          </div>
+          <div>
+            <label>18-24" (Opt)</label>
+            <input type="number" min="0" id="blow4" oninput="updateSptN()" placeholder="0" />
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:10px;">
+        <label>Lithology / Soil / Drilling Notes</label>
+        <textarea id="sampleNotes" rows="2" placeholder="Soil/rock type, moisture, density, bit pressure, water return..."></textarea>
+      </div>
+
+      <div style="margin-top:10px;">
+        <label>Attach Visual Record (Camera / Gallery)</label>
+        <input type="file" id="samplePhotoInput" accept="image/*" capture="environment" multiple onchange="handlePhotoSelect(event)" />
+        <div id="pendingPhotos" class="photo-grid"></div>
+      </div>
+
+      <button class="btn-primary" style="width:100%; margin-top:12px; padding:13px;" onclick="saveSampleEntry()">
+        Save Entry to Log
+      </button>
+    </div>
+
+    <!-- Hole Visual Records -->
+    <div class="card">
+      <div class="card-title">
+        <span>Hole Visual Records (<span id="photoCount">0</span>)</span>
+        <label class="btn-outline btn-sm no-print" style="margin:0; cursor:pointer;">
+          + Add Photo
+          <input type="file" accept="image/*" capture="environment" multiple style="display:none;" onchange="addHoleDirectPhotos(event)" />
+        </label>
+      </div>
+      <div id="holePhotoGallery" class="photo-grid"></div>
+    </div>
+
+    <!-- Sample & Interval Log -->
+    <div class="card">
+      <div class="card-title">
+        <span>Sample &amp; Interval Log (<span id="entryCount">0</span>)</span>
+      </div>
+      <div id="logList"></div>
+    </div>
+
+    <!-- Damaged, Worn, or Lost Tooling Discrepancy Box -->
+    <div class="card discrepancy-card">
+      <div class="card-title">
+        <span style="color:var(--red);">Damaged / Worn / Lost Tooling Discrepancy</span>
+        <button id="dictateBtn" class="btn-red btn-sm no-print" onclick="dictateDiscrepancy()">
+          Mic Dictate
+        </button>
+      </div>
+      <textarea id="toolingDiscrepancy" rows="3" oninput="updateHoleField('discrepancy', this.value)" placeholder="Record any broken rods, worn bits/shoes, lost downhole tooling, or equipment issues (type or tap Mic Dictate)..."></textarea>
+      <div id="dictateStatus" style="font-size:0.78rem; color:var(--muted); margin-top:4px;"></div>
+    </div>
+  </div>
+
+  <!-- Fullscreen Photo Viewer -->
+  <div id="photoModal" class="modal-backdrop" onclick="this.classList.remove('open')">
+    <img id="modalImg" src="" alt="Full view" />
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'drill_log_pro_v5';
+    const M_TO_FT = 3.280839895;
+
+    let state = {
+      unitSystem: 'imperial',
+      metricMode: 'm_cm',
+      activeHoleId: null,
+      holes: []
+    };
+
+    let timerSeconds = 0;
+    let timerInterval = null;
+    let pendingImages = [];
+    let recognition = null;
+    let voiceActive = false;
+
+    function todayISO() {
+      const d = new Date();
+      return d.toISOString().split('T')[0];
+    }
+
+    function nowTime() {
+      const d = new Date();
+      return d.toTimeString().slice(0, 5);
+    }
+
+    function defaultHole(index = 1) {
+      return {
+        id: 'hole_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+        name: `DH-26-0${index}`,
+        date: todayISO(),
+        holeStartTime: nowTime(),
+        holeStopTime: '',
+        rigStart: '',
+        rigEnd: '',
+        waterTable: '',
+        targetDepthFt: 100,
+        rodType: 'MC5',
+        rodLengthFt: 5,
+        rodCount: 0,
+        discrepancy: '',
+        photos: [],
+        entries: []
+      };
+    }
+
+    function loadState() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+        if (saved && Array.isArray(saved.holes) && saved.holes.length > 0) {
+          state = saved;
+        } else {
+          const h = defaultHole(1);
+          state = { unitSystem: 'imperial', metricMode: 'm_cm', activeHoleId: h.id, holes: [h] };
+          saveState();
+        }
+      } catch (e) {
+        const h = defaultHole(1);
+        state = { unitSystem: 'imperial', metricMode: 'm_cm', activeHoleId: h.id, holes: [h] };
+      }
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch (e) {
+        alert('Device storage is full. Please export CSV or delete old photos.');
+      }
+    }
+
+    function getActiveHole() {
+      return state.holes.find(h => h.id === state.activeHoleId) || state.holes[0];
+    }
+
+    function formatDepthPrimary(feet) {
+      const sign = feet < 0 ? '-' : '';
+      const absFt = Math.abs(feet);
+      if (state.unitSystem === 'imperial') {
+        let wholeFt = Math.floor(absFt);
+        let inches = +((absFt - wholeFt) * 12).toFixed(1);
+        if (inches >= 12) { wholeFt += 1; inches = 0; }
+        return `${sign}${wholeFt}' ${inches.toFixed(1)}"`;
+      } else {
+        const meters = absFt / M_TO_FT;
+        if (state.metricMode === 'm_cm') {
+          let wholeM = Math.floor(meters);
+          let cm = +((meters - wholeM) * 100).toFixed(1);
+          if (cm >= 100) { wholeM += 1; cm = 0; }
+          return `${sign}${wholeM}m ${cm.toFixed(1)}cm`;
+        } else if (state.metricMode === 'cm_mm') {
+          const totalCm = meters * 100;
+          let wholeCm = Math.floor(totalCm);
+          let mm = +((totalCm - wholeCm) * 10).toFixed(0);
+          if (mm >= 10) { wholeCm += 1; mm = 0; }
+          return `${sign}${wholeCm}cm ${mm}mm`;
+        } else {
+          return `${sign}${Math.round(meters * 1000)} mm`;
+        }
+      }
+    }
+
+    function formatDepthSecondary(feet) {
+      if (state.unitSystem === 'imperial') {
+        return `${feet.toFixed(2)} ft`;
+      } else {
+        return `${(feet / M_TO_FT).toFixed(3)} m`;
+      }
+    }
+
+    function setUnitSystem(sys) {
+      state.unitSystem = sys;
+      saveState();
+      render();
+    }
+
+    function setMetricMode(mode) {
+      state.metricMode = mode;
+      saveState();
+      render();
+    }
+
+    function onRodTypeChange(val) {
+      const hole = getActiveHole();
+      hole.rodType = val;
+      const fiveFtTypes = ['MC5', 'MC7', '3.5" HSA', '4.5" HSA', '3.5" SFA', 'DT37', 'DT45'];
+      if (fiveFtTypes.includes(val)) {
+        hole.rodLengthFt = 5;
+      } else if (['HQ', 'NQ', 'PQ', 'HW', 'AW', 'Sonic'].includes(val)) {
+        hole.rodLengthFt = 10;
+      }
+      saveState();
+      render();
+    }
+
+    function updateRodLengthParts() {
+      const hole = getActiveHole();
+      const major = parseFloat(document.getElementById('rodMajorInput').value) || 0;
+      const minor = parseFloat(document.getElementById('rodMinorInput').value) || 0;
+      if (state.unitSystem === 'imperial') {
+        hole.rodLengthFt = major + (minor / 12);
+      } else {
+        const meters = major + (minor / 100);
+        hole.rodLengthFt = meters * M_TO_FT;
+      }
+      saveState();
+      renderStatsOnly();
+    }
+
+    function updateTargetDepth(val) {
+      const hole = getActiveHole();
+      const num = parseFloat(val) || 0;
+      hole.targetDepthFt = state.unitSystem === 'imperial' ? num : num * M_TO_FT;
+      saveState();
+      renderStatsOnly();
+    }
+
+    function updateHoleField(field, value) {
+      const hole = getActiveHole();
+      hole[field] = value;
+      saveState();
+      if (field === 'rigStart' || field === 'rigEnd') updateRigHoursBadge();
+      if (field === 'name') renderHoleDropdown();
+    }
+
+    function updateRigHoursBadge() {
+      const hole = getActiveHole();
+      const s = parseFloat(hole.rigStart);
+      const e = parseFloat(hole.rigEnd);
+      const badge = document.getElementById('rigTotalHrsBadge');
+      if (!isNaN(s) && !isNaN(e) && e >= s) {
+        badge.textContent = `${(e - s).toFixed(1)} hrs`;
+      } else {
+        badge.textContent = `0.0 hrs`;
+      }
+    }
+
+    function renderHoleDropdown() {
+      const hole = getActiveHole();
+      const select = document.getElementById('holeSelect');
+      select.innerHTML = state.holes.map(h => {
+        const dFt = h.rodCount * h.rodLengthFt;
+        return `<option value="${h.id}" ${h.id === hole.id ? 'selected' : ''}>${h.name} (${formatDepthPrimary(dFt)})</option>`;
+      }).join('');
+    }
+
+    function renderStatsOnly() {
+      const hole = getActiveHole();
+      const currentFt = hole.rodCount * hole.rodLengthFt;
+      const deltaFt = hole.targetDepthFt - currentFt;
+
+      document.getElementById('statRods').textContent = hole.rodCount;
+      document.getElementById('statRodEach').textContent = `${formatDepthPrimary(hole.rodLengthFt)} ea`;
+      document.getElementById('statDepth').textContent = formatDepthPrimary(currentFt);
+      document.getElementById('statDepthAlt').textContent = formatDepthSecondary(currentFt);
+
+      const targetBox = document.getElementById('targetStatBox');
+      const targetVal = document.getElementById('statTargetDelta');
+      const targetAlt = document.getElementById('statTargetAlt');
+      const targetLbl = document.getElementById('statTargetLbl');
+
+      if (deltaFt >= 0) {
+        targetBox.classList.remove('overdrill');
+        targetVal.classList.remove('overdrill-text');
+        targetVal.textContent = formatDepthPrimary(deltaFt);
+        targetAlt.textContent = formatDepthSecondary(deltaFt);
+        targetLbl.textContent = 'To Target';
+      } else {
+        const overFt = Math.abs(deltaFt);
+        targetBox.classList.add('overdrill');
+        targetVal.classList.add('overdrill-text');
+        targetVal.textContent = `+${formatDepthPrimary(overFt)}`;
+        targetAlt.textContent = `+${formatDepthSecondary(overFt)}`;
+        targetLbl.textContent = 'Overdrilled';
+      }
+      renderHoleDropdown();
+    }
+
+    function render() {
+      const hole = getActiveHole();
+      if (!hole) return;
+
+      document.getElementById('tabImperial').classList.toggle('active', state.unitSystem === 'imperial');
+      document.getElementById('tabMetric').classList.toggle('active', state.unitSystem === 'metric');
+      document.getElementById('metricSubbar').classList.toggle('show', state.unitSystem === 'metric');
+      document.getElementById('metricPrecision').value = state.metricMode;
+
+      const isImp = state.unitSystem === 'imperial';
+      document.getElementById('waterLbl').textContent = isImp ? 'Water Table (ft)' : 'Water Table (m)';
+      document.getElementById('targetLbl').textContent = isImp ? 'Target Depth (ft)' : 'Target Depth (m)';
+      document.getElementById('rodMajorLbl').textContent = isImp ? 'Rod Length (ft)' : 'Rod Length (m)';
+      document.getElementById('rodMinorLbl').textContent = isImp ? 'Extra (in)' : 'Extra (cm)';
+      document.getElementById('fromLbl').textContent = isImp ? 'From (ft)' : 'From (m)';
+      document.getElementById('toLbl').textContent = isImp ? 'To (ft)' : 'To (m)';
+      document.getElementById('recLenLbl').textContent = isImp ? 'Recovered (in)' : 'Recovered (cm)';
+
+      document.getElementById('logDate').value = hole.date || todayISO();
+      document.getElementById('holeStartTime').value = hole.holeStartTime || '';
+      document.getElementById('holeStopTime').value = hole.holeStopTime || '';
+      document.getElementById('rigStart').value = hole.rigStart || '';
+      document.getElementById('rigEnd').value = hole.rigEnd || '';
+      document.getElementById('waterTable').value = hole.waterTable || '';
+      updateRigHoursBadge();
+
+      document.getElementById('holeName').value = hole.name;
+      document.getElementById('targetDepthInput').value = isImp
+        ? +hole.targetDepthFt.toFixed(2)
+        : +(hole.targetDepthFt / M_TO_FT).toFixed(2);
+
+      document.getElementById('rodType').value = hole.rodType;
+      if (isImp) {
+        const wholeFt = Math.floor(hole.rodLengthFt);
+        const remIn = +((hole.rodLengthFt - wholeFt) * 12).toFixed(1);
+        document.getElementById('rodMajorInput').value = wholeFt;
+        document.getElementById('rodMinorInput').value = remIn;
+      } else {
+        const meters = hole.rodLengthFt / M_TO_FT;
+        const wholeM = Math.floor(meters);
+        const remCm = +((meters - wholeM) * 100).toFixed(1);
+        document.getElementById('rodMajorInput').value = wholeM;
+        document.getElementById('rodMinorInput').value = remCm;
+      }
+
+      document.getElementById('toolingDiscrepancy').value = hole.discrepancy || '';
+
+      renderStatsOnly();
+
+      const currentFt = hole.rodCount * hole.rodLengthFt;
+      const lastToFt = hole.entries.length > 0 ? hole.entries[0].toFt : 0;
+      const nextToFt = currentFt > lastToFt ? currentFt : lastToFt + hole.rodLengthFt;
+
+      document.getElementById('sampleFrom').value = isImp
+        ? +lastToFt.toFixed(2)
+        : +(lastToFt / M_TO_FT).toFixed(2);
+      document.getElementById('sampleTo').value = isImp
+        ? +nextToFt.toFixed(2)
+        : +(nextToFt / M_TO_FT).toFixed(2);
+
+      const allPhotos = [...hole.photos];
+      hole.entries.forEach(ent => {
+        if (ent.photos) ent.photos.forEach(p => allPhotos.push(p));
+      });
+      document.getElementById('photoCount').textContent = allPhotos.length;
+      document.getElementById('holePhotoGallery').innerHTML = allPhotos.length === 0
+        ? `<div style="grid-column:1/-1; color:var(--muted); font-size:0.85rem;">No photos attached to this hole yet.</div>`
+        : allPhotos.map(src => `
+          <div class="photo-thumb" onclick="openPhoto('${src}')">
+            <img src="${src}" alt="Core photo" />
+          </div>
+        `).join('');
+
+      document.getElementById('entryCount').textContent = hole.entries.length;
+      const logList = document.getElementById('logList');
+      if (hole.entries.length === 0) {
+        logList.innerHTML = `<div style="color:var(--muted); font-size:0.9rem;">No intervals or samples logged yet for ${escapeHtml(hole.name)}.</div>`;
+      } else {
+        logList.innerHTML = hole.entries.map(ent => {
+          const isOver = ent.toFt > hole.targetDepthFt;
+          return `
+            <div class="log-item ${isOver ? 'overdrill-item' : ''}">
+              <div style="display:flex; justify-content:space-between; align-items:center; gap:6px;">
+                <div>
+                  <strong>${escapeHtml(ent.type)}</strong>
+                  ${isOver ? `<span class="badge badge-over">OVERDRILL</span>` : ''}
+                  ${ent.spt ? `<span class="badge badge-spt">N = ${ent.spt.nValue} (${ent.spt.b1}/${ent.spt.b2}/${ent.spt.b3}${ent.spt.b4 ? '/' + ent.spt.b4 : ''})</span>` : ''}
+                </div>
+                <span class="mono" style="color:var(--blaze); font-weight:700;">
+                  ${formatDepthPrimary(ent.fromFt)} – ${formatDepthPrimary(ent.toFt)}
+                </span>
+              </div>
+              <div style="font-size:0.8rem; color:var(--muted); margin:4px 0;">
+                ${ent.time} • Rec: <strong>${ent.recovery}%</strong>
+                ${ent.duration ? ` • Run: <span class="mono">${ent.duration}</span>` : ''}
+              </div>
+              ${ent.notes ? `<div style="font-size:0.94rem; margin-bottom:4px;">${escapeHtml(ent.notes)}</div>` : ''}
+              ${ent.photos && ent.photos.length ? `
+                <div class="photo-grid">
+                  ${ent.photos.map(src => `
+                    <div class="photo-thumb" onclick="openPhoto('${src}')">
+                      <img src="${src}" alt="Sample photo" />
+                    </div>
+                  `).join('')}
+                </div>
+              ` : ''}
+              <div style="text-align:right; margin-top:6px;" class="no-print">
+                <button class="btn-outline btn-sm" style="padding:3px 8px; font-size:0.75rem;" onclick="deleteEntry('${ent.id}')">Delete</button>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+    }
+
+    function changeRodCount(delta) {
+      const hole = getActiveHole();
+      hole.rodCount = Math.max(0, hole.rodCount + delta);
+      saveState();
+      render();
+    }
+
+    function createNewHole() {
+      const h = defaultHole(state.holes.length + 1);
+      state.holes.unshift(h);
+      state.activeHoleId = h.id;
+      saveState();
+      render();
+    }
+
+    function switchHole(id) {
+      state.activeHoleId = id;
+      saveState();
+      render();
+    }
+
+    function deleteCurrentHole() {
+      if (state.holes.length <= 1) {
+        alert('You must keep at least one active hole.');
+        return;
+      }
+      if (!confirm('Delete this hole and all its entries?')) return;
+      state.holes = state.holes.filter(h => h.id !== state.activeHoleId);
+      state.activeHoleId = state.holes[0].id;
+      saveState();
+      render();
+    }
+
+    function toggleSptBox() {
+      const val = document.getElementById('sampleType').value;
+      document.getElementById('sptBox').classList.toggle('show', val === 'Split Spoon (SPT)');
+    }
+
+    function updateSptN() {
+      const b2 = parseInt(document.getElementById('blow2').value) || 0;
+      const b3 = parseInt(document.getElementById('blow3').value) || 0;
+      document.getElementById('sptNBadge').textContent = `N-Value: ${b2 + b3}`;
+    }
+
+    function calcRecoveryPct() {
+      const from = parseFloat(document.getElementById('sampleFrom').value) || 0;
+      const to = parseFloat(document.getElementById('sampleTo').value) || 0;
+      const recLen = parseFloat(document.getElementById('sampleRecLen').value);
+      const runLen = to - from;
+      if (runLen > 0 && !isNaN(recLen)) {
+        const runMinor = state.unitSystem === 'imperial' ? runLen * 12 : runLen * 100;
+        const pct = Math.round((recLen / runMinor) * 100);
+        document.getElementById('sampleRecPct').value = pct;
+      }
+    }
+
+    function formatTime(sec) {
+      const h = String(Math.floor(sec / 3600)).padStart(2, '0');
+      const m = String(Math.floor((sec % 3600) / 60)).padStart(2, '0');
+      const s = String(sec % 60).padStart(2, '0');
+      return `${h}:${m}:${s}`;
+    }
+
+    function toggleTimer() {
+      const btn = document.getElementById('timerStartBtn');
+      const disp = document.getElementById('timerDisplay');
+      if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+        btn.textContent = 'Resume';
+        btn.className = 'btn-green';
+        disp.classList.remove('running');
+      } else {
+        timerInterval = setInterval(() => {
+          timerSeconds++;
+          disp.textContent = formatTime(timerSeconds);
+        }, 1000);
+        btn.textContent = 'Pause';
+        btn.className = 'btn-primary';
+        disp.classList.add('running');
+      }
+    }
+
+    function resetTimer() {
+      clearInterval(timerInterval);
+      timerInterval = null;
+      timerSeconds = 0;
+      document.getElementById('timerDisplay').textContent = '00:00:00';
+      document.getElementById('timerDisplay').classList.remove('running');
+      const btn = document.getElementById('timerStartBtn');
+      btn.textContent = 'Start';
+      btn.className = 'btn-green';
+    }
+
+    function logIntervalToSample() {
+      const formatted = formatTime(timerSeconds);
+      document.getElementById('sampleDuration').value = formatted;
+      document.getElementById('lastLapBadge').textContent = `Captured: ${formatted}`;
+      document.getElementById('sampleNotes').focus();
+    }
+
+    function compressImage(file, maxWidth = 900, quality = 0.7) {
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = new Image();
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            let w = img.width;
+            let h = img.height;
+            if (w > maxWidth) {
+              h = Math.round((h * maxWidth) / w);
+              w = maxWidth;
+            }
+            canvas.width = w;
+            canvas.height = h;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, w, h);
+            resolve(canvas.toDataURL('image/jpeg', quality));
+          };
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function handlePhotoSelect(event) {
+      const files = Array.from(event.target.files || []);
+      for (const f of files) {
+        const dataUrl = await compressImage(f);
+        pendingImages.push(dataUrl);
+      }
+      document.getElementById('pendingPhotos').innerHTML = pendingImages.map((src, i) => `
+        <div class="photo-thumb">
+          <img src="${src}" />
+          <button class="photo-del" onclick="pendingImages.splice(${i},1); this.parentElement.remove();">✕</button>
+        </div>
+      `).join('');
+      event.target.value = '';
+    }
+
+    async function addHoleDirectPhotos(event) {
+      const hole = getActiveHole();
+      const files = Array.from(event.target.files || []);
+      for (const f of files) {
+        const dataUrl = await compressImage(f);
+        hole.photos.unshift(dataUrl);
+      }
+      saveState();
+      render();
+      event.target.value = '';
+    }
+
+    function saveSampleEntry() {
+      const hole = getActiveHole();
+      const isImp = state.unitSystem === 'imperial';
+      const rawFrom = parseFloat(document.getElementById('sampleFrom').value) || 0;
+      const rawTo = parseFloat(document.getElementById('sampleTo').value) || 0;
+      const fromFt = isImp ? rawFrom : rawFrom * M_TO_FT;
+      const toFt = isImp ? rawTo : rawTo * M_TO_FT;
+
+      const recovery = parseInt(document.getElementById('sampleRecPct').value) || 0;
+      const type = document.getElementById('sampleType').value;
+      const duration = document.getElementById('sampleDuration').value.trim();
+      const notes = document.getElementById('sampleNotes').value.trim();
+
+      let spt = null;
+      if (type === 'Split Spoon (SPT)') {
+        const b1 = parseInt(document.getElementById('blow1').value) || 0;
+        const b2 = parseInt(document.getElementById('blow2').value) || 0;
+        const b3 = parseInt(document.getElementById('blow3').value) || 0;
+        const b4 = parseInt(document.getElementById('blow4').value) || 0;
+        spt = { b1, b2, b3, b4, nValue: b2 + b3 };
+      }
+
+      hole.entries.unshift({
+        id: 'ent_' + Date.now(),
+        fromFt,
+        toFt,
+        recovery,
+        type,
+        spt,
+        duration,
+        notes,
+        photos: [...pendingImages],
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      });
+
+      pendingImages = [];
+      document.getElementById('pendingPhotos').innerHTML = '';
+      document.getElementById('sampleNotes').value = '';
+      document.getElementById('sampleDuration').value = '';
+      document.getElementById('sampleRecLen').value = '';
+      ['blow1', 'blow2', 'blow3', 'blow4'].forEach(id => document.getElementById(id).value = '');
+      updateSptN();
+
+      saveState();
+      render();
+    }
+
+    function deleteEntry(id) {
+      const hole = getActiveHole();
+      hole.entries = hole.entries.filter(e => e.id !== id);
+      saveState();
+      render();
+    }
+
+    function openPhoto(src) {
+      document.getElementById('modalImg').src = src;
+      document.getElementById('photoModal').classList.add('open');
+    }
+
+    function exportCSV() {
+      const hole = getActiveHole();
+      const rows = [
+        ['Hole', 'Date', 'Hole Start', 'Hole Stop', 'Rig Start Hrs', 'Rig End Hrs', 'Water Table', 'Rod Type', 'From (ft)', 'To (ft)', 'From (m)', 'To (m)', 'Overdrill', 'Sample Type', 'SPT Blows', 'SPT N-Value', 'Recovery %', 'Run Time', 'Logged Time', 'Notes', 'Tooling Discrepancy']
+      ];
+      hole.entries.slice().reverse().forEach(e => {
+        const over = e.toFt > hole.targetDepthFt ? 'YES' : 'NO';
+        const blows = e.spt ? `${e.spt.b1}/${e.spt.b2}/${e.spt.b3}${e.spt.b4 ? '/' + e.spt.b4 : ''}` : '';
+        const nVal = e.spt ? e.spt.nValue : '';
+        rows.push([
+          hole.name,
+          hole.date || '',
+          hole.holeStartTime || '',
+          hole.holeStopTime || '',
+          hole.rigStart || '',
+          hole.rigEnd || '',
+          hole.waterTable || '',
+          hole.rodType,
+          e.fromFt.toFixed(2),
+          e.toFt.toFixed(2),
+          (e.fromFt / M_TO_FT).toFixed(3),
+          (e.toFt / M_TO_FT).toFixed(3),
+          over,
+          e.type,
+          blows,
+          nVal,
+          e.recovery,
+          e.duration || '',
+          e.time,
+          `"${(e.notes || '').replace(/"/g, '""')}"`,
+          `"${(hole.discrepancy || '').replace(/"/g, '""')}"`
+        ]);
+      });
+      const csv = rows.map(r => r.join(',')).join('\n');
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${hole.name}_v5_log.csv`;
+      a.click();
+    }
+
+    function toggleVoice() {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        alert('Voice control is not supported in this browser. Try Chrome on Android or Safari on iOS.');
+        return;
+      }
+      if (voiceActive) {
+        voiceActive = false;
+        if (recognition) recognition.stop();
+        document.getElementById('voiceToggleBtn').classList.remove('active');
+        document.getElementById('voiceLabel').textContent = 'Voice Off';
+        document.getElementById('voicePanel').style.display = 'none';
+        return;
+      }
+
+      recognition = new SpeechRecognition();
+      recognition.continuous = true;
+      recognition.interimResults = false;
+      recognition.lang = 'en-US';
+
+      recognition.onstart = () => {
+        voiceActive = true;
+        document.getElementById('voiceToggleBtn').classList.add('active');
+        document.getElementById('voiceLabel').textContent = 'Listening';
+        document.getElementById('voicePanel').style.display = 'block';
+      };
+
+      recognition.onresult = (event) => {
+        const transcript = event.results[event.results.length - 1][0].transcript.trim().toLowerCase();
+        document.getElementById('voiceStatus').textContent = `Heard: "${transcript}"`;
+
+        if (transcript.includes('add rod') || transcript.includes('plus rod')) {
+          changeRodCount(1);
+        } else if (transcript.includes('remove rod') || transcript.includes('pull rod')) {
+          changeRodCount(-1);
+        } else if (transcript.includes('start timer') || transcript.includes('resume timer')) {
+          if (!timerInterval) toggleTimer();
+        } else if (transcript.includes('stop timer') || transcript.includes('pause timer')) {
+          if (timerInterval) toggleTimer();
+        } else if (transcript.includes('reset timer')) {
+          resetTimer();
+        } else if (transcript.includes('log interval') || transcript.includes('log run')) {
+          logIntervalToSample();
+        }
+      };
+
+      recognition.onend = () => {
+        if (voiceActive) {
+          try { recognition.start(); } catch (e) {}
+        }
+      };
+
+      recognition.start();
+    }
+
+    function dictateDiscrepancy() {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        alert('Voice dictation is not supported in this browser.');
+        return;
+      }
+      const status = document.getElementById('dictateStatus');
+      const dict = new SpeechRecognition();
+      dict.lang = 'en-US';
+      dict.interimResults = false;
+      status.textContent = 'Listening... speak your tooling discrepancy now.';
+
+      dict.onresult = (event) => {
+        const spoken = event.results[0][0].transcript.trim();
+        const box = document.getElementById('toolingDiscrepancy');
+        box.value = box.value ? `${box.value} ${spoken}` : spoken;
+        updateHoleField('discrepancy', box.value);
+        status.textContent = `Added: "${spoken}"`;
+      };
+
+      dict.onerror = () => {
+        status.textContent = 'Could not capture audio. Tap Mic Dictate to try again.';
+      };
+
+      dict.start();
+    }
+
+    function escapeHtml(str) {
+      return String(str).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+    }
+
+    loadState();
+    render();
+  </script>
+</body>
+</html>
